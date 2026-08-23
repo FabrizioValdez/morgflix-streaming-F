@@ -1,6 +1,6 @@
 import { MovieItem, RowData } from '@/types/movie';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://morgflix-streaming.onrender.com/api';
 
 /**
  * Obtiene el catálogo completo agrupado para el Home
@@ -8,22 +8,21 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 export async function getMoviesCatalog(): Promise<RowData[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/movies`, {
-      next: { revalidate: 60 } // Revalida cada 60 segundos (Server Components)
+      next: { revalidate: 60 }
     });
 
-    if (!res.ok) throw new Error('Error al obtener el catálogo');
+    if (!res.ok) throw new Error(`Error al obtener el catálogo: ${res.status}`);
 
     const { data }: { data: MovieItem[] } = await res.json();
 
-    // Organizar los datos recibidos de Laravel en filas para la interfaz
     return [
       {
         title: "",
-        items: data
+        items: data || []
       }
     ];
   } catch (error) {
-    console.error(error);
+    console.error('Error obteniendo el catálogo de películas:', error);
     return [];
   }
 }
