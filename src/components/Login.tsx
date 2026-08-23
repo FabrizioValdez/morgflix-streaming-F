@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 export default function LoginPage() {
   const router = useRouter();
 
-  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,27 +18,29 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/login", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({ name, password }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        // Muestra el mensaje de error del backend (ej. credenciales inválidas o error 422)
-        throw new Error(data.message || data.errors?.name?.[0] || "Error al iniciar sesión.");
+        throw new Error(data.message || data.errors?.email?.[0] || "Error al iniciar sesión.");
       }
 
-      // Guardar sesión devuelta por Laravel
+      // 1. Guardar en localStorage para tu lógica del cliente
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      // Login correcto → Redirigir a HomeScreen
+      // 2. Crear la cookie auth_token para que el middleware la reconozca en el servidor
+      document.cookie = `auth_token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
+
+      // 3. Redirigir al inicio
       router.push("/");
       router.refresh();
     } catch (err: any) {
@@ -72,21 +74,21 @@ export default function LoginPage() {
             Iniciar sesión
           </h2>
 
-          {/* Usuario (name) */}
+          {/* Usuario (email) */}
           <div className="mb-4">
             <label
-              htmlFor="name"
+              htmlFor="email"
               className="block text-sm text-[#D8CFC3] mb-2"
             >
-              Usuario
+              Email
             </label>
 
             <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Ingresa tu usuario"
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Ingresa tu email"
               required
               className="w-full px-4 py-3 rounded bg-[#0E0B0A] border border-white/10 text-[#F5EFE6] outline-none focus:border-[#FF6A3D]"
             />
