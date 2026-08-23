@@ -11,6 +11,8 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
 
@@ -18,7 +20,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
+      const response = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
